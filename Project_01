@@ -1,12 +1,15 @@
 import pandas as pd
 
-# import Dataset 
-data = pd.read_csv(r"C:\Dataset for python\Movies Dataset\Best Movies Netflix.csv", encoding = 'utf8')
+# import Dataset  
+data = pd.read_csv(r"C:\Users\USER\Desktop\Dataset\Movies dataset\n_movies.csv", encoding = 'utf8')
 data.info()
 data.shape # shape
 data.columns
-data.MAIN_GENRE # genre columns
+data.genre # genre columns
 data.isnull().sum() #Check the null value, Here nullvalue present in this dataset
+data = data.dropna()
+data.isnull().sum() ##Check the null value, Here nullvalue is not present in this dataset
+
 
 duplicate = data.duplicated()  # Find the duplicate 
 duplicate   #Output shows the False which means No dupicates are here
@@ -18,8 +21,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer #term frequencey- in
 tfidf = TfidfVectorizer(stop_words = "english")    # taking stop words from tfid vectorizer 
 
 # Preparing the Tfidf matrix by fitting and transforming
-tfidf_matrix = tfidf.fit_transform(data.MAIN_GENRE)   #Transform a count matrix to a normalized tf or tf-idf representation
-tfidf_matrix.shape #387,15
+tfidf_matrix = tfidf.fit_transform(data.genre)   #Transform a count matrix to a normalized tf or tf-idf representation
+tfidf_matrix.shape #5754,30
 
 
 from sklearn.metrics.pairwise import linear_kernel
@@ -28,15 +31,15 @@ from sklearn.metrics.pairwise import linear_kernel
 cosine_sim_matrix = linear_kernel(tfidf_matrix, tfidf_matrix)
 
 # creating a mapping of Movie name to index number 
-data_index = pd.Series(data.index, index = data['TITLE']).drop_duplicates()
+data_index = pd.Series(data.index, index = data['title']).drop_duplicates()
 
-data_id = data_index["Dangal"]
+data_id = data_index["Jogi"]
 data_id
 
-def get_recommendations(TITLE, topN):    
+def get_recommendations(title, topN):    
     # topN = 10
     # Getting the movie index using its title 
-    data_id = data_index[TITLE]
+    data_id = data_index[title]
     
     # Getting the pair wise similarity score for all the Movie name with that 
     cosine_scores = list(enumerate(cosine_sim_matrix[data_id]))
@@ -52,14 +55,14 @@ def get_recommendations(TITLE, topN):
     data_scores =  [i[1] for i in cosine_scores_N]
     
     # Similar movies and scores
-    data_similar_show = pd.DataFrame(columns=["TITLE", "SCORE"])
-    data_similar_show["TITLE"] = data.loc[data_idx, "TITLE"]
-    data_similar_show["SCORE"] = data_scores
+    data_similar_show = pd.DataFrame(columns=["title", "genre"])
+    data_similar_show["title"] = data.loc[data_idx, "title"]
+    data_similar_show["genre"] = data_scores
     data_similar_show.reset_index(inplace = True)  
     # data_similar_show.drop(["index"], axis=1, inplace=True)
     print (data_similar_show)
     # return (data_similar_show)
 
 # Enter your Movie and number of Movies to be recommended 
-get_recommendations("Black Friday", topN = 10)
-data_index["Black Friday"]
+get_recommendations("Baby Driver", topN = 10)
+data_index["Baby Driver"]
